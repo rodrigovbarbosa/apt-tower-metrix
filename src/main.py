@@ -10,7 +10,9 @@ queryLastMinutes = 60
 syncTimeSeconds = {}
 collectTimeSeconds = {}
 scheduler = None
-
+import os
+print("oi")
+print(os.getcwd())
 import app.database as database
 import app.ADXQuery as adx_query
 import app.ADXDriver as adx_driver
@@ -130,7 +132,11 @@ def runLogs():
             # Confirmar a transação
             conn.commit()
             # Encerrando conexão
-            print(f"All records inserted in {table_name} successfully.")        
+            print(f"All records inserted in {table_name} successfully.")
+
+            #metrix calculation
+            #[TODO]
+            #
         except Exception as e:            
             end = datetime.now(timezone.utc)
             print("Error: ", str(e))                    
@@ -138,7 +144,7 @@ def runLogs():
     end = datetime.now(timezone.utc)
     time_to_process = (end- now_1).total_seconds()
     print("Processing takes " + str(time_to_process) + " seconds")
-    print(' xxxxxxxxxxxxxxxxxxxxxxxx  Schedule END  xxxxxxxxxxxxxxxxxxxxxxxx ')
+    print('xxxxxxxxxxxxxxxxxxxxxxxx  Schedule END  xxxxxxxxxxxxxxxxxxxxxxxx')
     conn.close()
     
 runLogs()
