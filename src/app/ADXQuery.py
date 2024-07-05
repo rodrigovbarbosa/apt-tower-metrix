@@ -1,0 +1,37 @@
+              
+def createQuery3(start, end, tags, site, tower):
+    query2 = "".join([        
+    "let arrayTags = dynamic(",
+    "", tags,"",
+    ");",
+    "let start = datetime(", start, ");",   
+    "let second1 = datetime_part('Second',start); let minute1 = datetime_part('Minute',start);",
+    "let offsetstime = datetime_add('second', -second1, start); let stime = datetime_add('minute', -minute1, offsetstime);",
+    "let end = datetime(", end, ");",  
+    "let second = datetime_part('Second',end); ",
+    "let minute2 = datetime_part('Minute', end); ",
+    "let offsetetime = datetime_add('second', -second, end); ",
+    "let etime = datetime_add('minute', -minute2, offsetetime); ",
+    "let datTab = Common2 ",
+    "| project TS, Tag, SiteId, Value ",
+    "| where TS between (stime..etime)",
+    "| where SiteId == '", site, "'",
+    "| where Tag has_any (arrayTags);let filledTable = datTab",
+    "| make-series max(iff(isnotnull(todouble(Value)), todouble(Value), iff(Value == 'OMO', todouble(1), iff(Value == 'Surf', todouble(2), iff(Value == 'BRILHANTE', todouble(3), todouble(0)))))) default=int(null) on TS from stime to etime step 60s by Tag, SiteId",
+    "| project TS, Tag, fill_data=series_fill_forward(max_), SiteId",
+    "| project TS, Tag, fill_data_all=series_fill_backward(fill_data), SiteId",
+    "| mv-expand TS, fill_data_all",
+    "| project TS = format_datetime(todatetime(TS),'yyyy-MM-dd HH:mm:ss'), Value=todouble(fill_data_all), Tag, SiteId;",
+    "let filteredTable = filledTable",
+    "| project time_stamp = format_datetime(todatetime(TS),'yyyy-MM-dd HH:mm:ss'), SiteId, Tag, Value",
+    "| evaluate pivot(Tag, any(Value)) ",
+    "| order by time_stamp asc",
+    "| as timeseries;",
+    "let final_table = filteredTable",
+    "| extend Packed=pack_all();",
+    "let pack_table = final_table",
+    "| project todatetime(time_stamp), '", site, "', '", tower, "', tostring(Packed);",
+    "pack_table ",
+    "| project-rename ts = time_stamp, factory = Column1, module = Column2, data = Packed"
+    ])
+    return query2
